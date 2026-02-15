@@ -1,9 +1,8 @@
 /* ═══════════════════════════════════════════════════
-   FOOTBALL PONTOON — Win95 Design System
+   FOOTBALL PONTOON — Win95 Design System (Fixed)
    ═══════════════════════════════════════════════════ */
 
 :root {
-  /* Win95 Palette */
   --w95-desktop: #008080;
   --w95-grey: #C0C0C0;
   --w95-grey-light: #DFDFDF;
@@ -18,19 +17,12 @@
   --w95-green: #008800;
   --w95-orange: #996600;
   --w95-link: #0000CC;
-  --w95-muted: #4A4A4A; /* WCAG AA on grey */
-
-  /* Typography */
+  --w95-muted: #4A4A4A;
   --font-system: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
   --font-mono: 'Consolas', 'Courier New', monospace;
 }
 
-/* Reset */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   font-family: var(--font-system);
@@ -40,41 +32,37 @@ html, body {
   min-height: 100vh;
 }
 
-/* Scrollbar - Win95 style */
-::-webkit-scrollbar {
-  width: 16px;
-}
-::-webkit-scrollbar-track {
-  background: var(--w95-grey-light);
-  border-left: 1px solid var(--w95-grey-dark);
-}
+/* Scrollbar */
+::-webkit-scrollbar { width: 16px; }
+::-webkit-scrollbar-track { background: var(--w95-grey-light); border-left: 1px solid var(--w95-grey-dark); }
 ::-webkit-scrollbar-thumb {
   background: var(--w95-grey);
-  border-top: 2px solid var(--w95-white);
-  border-left: 2px solid var(--w95-white);
-  border-right: 2px solid var(--w95-grey-dark);
-  border-bottom: 2px solid var(--w95-grey-dark);
+  border-top: 2px solid var(--w95-white); border-left: 2px solid var(--w95-white);
+  border-right: 2px solid var(--w95-grey-dark); border-bottom: 2px solid var(--w95-grey-dark);
 }
 
-/* ── BEVELED BORDERS ── */
+/* ── UTILITY BEVELS (with !important to override anything) ── */
 .bevel-out {
-  border-top: 2px solid var(--w95-white);
-  border-left: 2px solid var(--w95-white);
-  border-right: 2px solid var(--w95-grey-dark);
-  border-bottom: 2px solid var(--w95-grey-dark);
+  border-top: 2px solid var(--w95-white) !important;
+  border-left: 2px solid var(--w95-white) !important;
+  border-right: 2px solid var(--w95-grey-dark) !important;
+  border-bottom: 2px solid var(--w95-grey-dark) !important;
 }
-
 .bevel-in {
-  border-top: 2px solid var(--w95-grey-dark);
-  border-left: 2px solid var(--w95-grey-dark);
-  border-right: 2px solid var(--w95-white);
-  border-bottom: 2px solid var(--w95-white);
+  border-top: 2px solid var(--w95-grey-dark) !important;
+  border-left: 2px solid var(--w95-grey-dark) !important;
+  border-right: 2px solid var(--w95-white) !important;
+  border-bottom: 2px solid var(--w95-white) !important;
 }
 
 /* ── WINDOW ── */
 .win95-window {
   background: var(--w95-grey);
   margin: 8px;
+  border-top: 2px solid var(--w95-white);
+  border-left: 2px solid var(--w95-white);
+  border-right: 2px solid var(--w95-grey-dark);
+  border-bottom: 2px solid var(--w95-grey-dark);
   box-shadow: 2px 2px 0 var(--w95-black);
 }
 
@@ -86,52 +74,28 @@ html, body {
   align-items: center;
   user-select: none;
 }
-
-.win95-titlebar-inactive {
-  background: var(--w95-grey-dark);
-}
+.win95-titlebar-inactive { background: var(--w95-grey-dark); }
 
 .win95-titlebar-text {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--w95-white);
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  font-size: 12px; font-weight: 700; color: var(--w95-white);
+  display: flex; align-items: center; gap: 4px;
 }
 
-.win95-titlebar-buttons {
-  display: flex;
-  gap: 2px;
-}
+.win95-titlebar-buttons { display: flex; gap: 2px; }
 
 .win95-titlebar-btn {
-  width: 16px;
-  height: 14px;
-  background: var(--w95-btn-face);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--w95-black);
-  cursor: pointer;
-  border-top: 1px solid var(--w95-white);
-  border-left: 1px solid var(--w95-white);
-  border-right: 1px solid var(--w95-grey-dark);
-  border-bottom: 1px solid var(--w95-grey-dark);
+  width: 16px; height: 14px; background: var(--w95-btn-face);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: var(--w95-black); cursor: pointer;
+  border-top: 1px solid var(--w95-white); border-left: 1px solid var(--w95-white);
+  border-right: 1px solid var(--w95-grey-dark); border-bottom: 1px solid var(--w95-grey-dark);
 }
-
 .win95-titlebar-btn:active {
-  border-top: 1px solid var(--w95-grey-dark);
-  border-left: 1px solid var(--w95-grey-dark);
-  border-right: 1px solid var(--w95-white);
-  border-bottom: 1px solid var(--w95-white);
+  border-top: 1px solid var(--w95-grey-dark); border-left: 1px solid var(--w95-grey-dark);
+  border-right: 1px solid var(--w95-white); border-bottom: 1px solid var(--w95-white);
 }
 
-.win95-window-body {
-  padding: 8px;
-}
+.win95-window-body { padding: 8px; }
 
 /* ── BUTTON ── */
 .win95-btn {
@@ -143,8 +107,17 @@ html, body {
   cursor: pointer;
   text-align: center;
   user-select: none;
-  border: none;
   width: 100%;
+  /* RAISED 3D LOOK — baked in, not relying on .bevel-out */
+  border-top: 2px solid var(--w95-white);
+  border-left: 2px solid var(--w95-white);
+  border-right: 2px solid var(--w95-grey-dark);
+  border-bottom: 2px solid var(--w95-grey-dark);
+  box-shadow: 1px 1px 0 var(--w95-black);
+}
+
+.win95-btn:hover {
+  background: #CBCBCB;
 }
 
 .win95-btn:active {
@@ -152,6 +125,8 @@ html, body {
   border-left: 2px solid var(--w95-grey-dark);
   border-right: 2px solid var(--w95-white);
   border-bottom: 2px solid var(--w95-white);
+  box-shadow: none;
+  padding: 7px 15px 5px 17px;
 }
 
 .win95-btn-primary {
@@ -165,6 +140,9 @@ html, body {
   cursor: default;
   opacity: 0.6;
 }
+.win95-btn:disabled:hover {
+  background: var(--w95-btn-face);
+}
 
 /* ── INPUT ── */
 .win95-input {
@@ -175,52 +153,53 @@ html, body {
   background: var(--w95-input-bg);
   color: var(--w95-black);
   outline: none;
-  border: none;
+  /* RECESSED LOOK — baked in */
+  border-top: 2px solid var(--w95-grey-dark);
+  border-left: 2px solid var(--w95-grey-dark);
+  border-right: 2px solid var(--w95-white);
+  border-bottom: 2px solid var(--w95-white);
 }
-
-.win95-input:disabled {
-  background: var(--w95-grey-light);
-}
-
-.win95-input::placeholder {
-  color: var(--w95-grey-dark);
-}
+.win95-input:focus { background: #FFFFF8; }
+.win95-input:disabled { background: var(--w95-grey-light); }
+.win95-input::placeholder { color: var(--w95-grey-dark); }
 
 /* ── RECESSED PANEL ── */
 .win95-recessed {
   background: var(--w95-input-bg);
+  border-top: 2px solid var(--w95-grey-dark);
+  border-left: 2px solid var(--w95-grey-dark);
+  border-right: 2px solid var(--w95-white);
+  border-bottom: 2px solid var(--w95-white);
 }
 
 /* ── BADGE ── */
 .win95-badge {
   font-family: var(--font-system);
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 10px; font-weight: 700;
   padding: 1px 6px;
   white-space: nowrap;
   display: inline-block;
+  border-top: 1px solid var(--w95-grey-dark);
+  border-left: 1px solid var(--w95-grey-dark);
+  border-right: 1px solid var(--w95-white);
+  border-bottom: 1px solid var(--w95-white);
 }
 
 /* ── CHECKBOX ── */
 .win95-checkbox {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 4px 0;
-  cursor: pointer;
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 4px 0; cursor: pointer;
 }
-
 .win95-checkbox-box {
-  width: 13px;
-  height: 13px;
+  width: 13px; height: 13px;
   background: var(--w95-input-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-top: 1px;
-  font-size: 10px;
-  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+  font-size: 10px; font-weight: 700;
+  border-top: 2px solid var(--w95-grey-dark);
+  border-left: 2px solid var(--w95-grey-dark);
+  border-right: 2px solid var(--w95-white);
+  border-bottom: 2px solid var(--w95-white);
 }
 
 /* ── DIVIDER ── */
@@ -234,80 +213,63 @@ html, body {
 /* ── TABS ── */
 .win95-tab {
   font-family: var(--font-system);
-  font-size: 11px;
-  padding: 5px 10px;
-  cursor: pointer;
-  border-radius: 3px 3px 0 0;
+  font-size: 11px; padding: 5px 10px;
+  cursor: pointer; border-radius: 3px 3px 0 0;
   user-select: none;
 }
-
 .win95-tab-active {
-  font-weight: 700;
-  background: var(--w95-grey);
-  border-top: 2px solid var(--w95-white);
-  border-left: 2px solid var(--w95-white);
-  border-right: 1px solid var(--w95-grey-dark);
-  border-bottom: none;
-  position: relative;
-  z-index: 1;
-  margin-bottom: -1px;
+  font-weight: 700; background: var(--w95-grey);
+  border-top: 2px solid var(--w95-white); border-left: 2px solid var(--w95-white);
+  border-right: 1px solid var(--w95-grey-dark); border-bottom: none;
+  position: relative; z-index: 1; margin-bottom: -1px;
 }
-
 .win95-tab-inactive {
   background: var(--w95-grey-light);
-  border-top: 1px solid var(--w95-grey-dark);
-  border-left: 1px solid var(--w95-grey-dark);
-  border-right: 1px solid var(--w95-grey-dark);
-  border-bottom: 1px solid var(--w95-grey-dark);
+  border-top: 1px solid var(--w95-grey-dark); border-left: 1px solid var(--w95-grey-dark);
+  border-right: 1px solid var(--w95-grey-dark); border-bottom: 1px solid var(--w95-grey-dark);
 }
 
 /* ── TASKBAR ── */
 .win95-taskbar {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 420px;
-  width: 100%;
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  max-width: 420px; width: 100%;
   background: var(--w95-grey);
   border-top: 2px solid var(--w95-white);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2px 4px;
-  z-index: 101;
-  height: 30px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 2px 4px; z-index: 101; height: 30px;
 }
 
 .win95-start-btn {
   font-family: var(--font-system);
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--w95-black);
+  font-size: 11px; font-weight: 700; color: var(--w95-black);
   background: var(--w95-btn-face);
-  padding: 3px 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  padding: 3px 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+  border-top: 2px solid var(--w95-white); border-left: 2px solid var(--w95-white);
+  border-right: 2px solid var(--w95-grey-dark); border-bottom: 2px solid var(--w95-grey-dark);
+  box-shadow: 1px 1px 0 var(--w95-black);
+}
+.win95-start-btn:active {
+  border-top: 2px solid var(--w95-grey-dark); border-left: 2px solid var(--w95-grey-dark);
+  border-right: 2px solid var(--w95-white); border-bottom: 2px solid var(--w95-white);
+  box-shadow: none;
 }
 
 .win95-clock {
   font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--w95-black);
+  font-size: 11px; color: var(--w95-black);
   padding: 3px 8px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  display: flex; align-items: center; gap: 4px;
+  border-top: 2px solid var(--w95-grey-dark); border-left: 2px solid var(--w95-grey-dark);
+  border-right: 2px solid var(--w95-white); border-bottom: 2px solid var(--w95-white);
 }
 
 /* ── START MENU ── */
 .win95-start-menu {
-  position: fixed;
-  bottom: 30px;
-  width: 230px;
+  position: fixed; bottom: 30px; width: 230px;
   background: var(--w95-grey);
+  border-top: 2px solid var(--w95-white); border-left: 2px solid var(--w95-white);
+  border-right: 2px solid var(--w95-grey-dark); border-bottom: 2px solid var(--w95-grey-dark);
   box-shadow: 2px 2px 0 var(--w95-black);
   z-index: 100;
 }
@@ -315,72 +277,39 @@ html, body {
 .win95-start-sidebar {
   width: 24px;
   background: linear-gradient(180deg, var(--w95-navy), var(--w95-navy-bright));
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 6px 0;
+  display: flex; align-items: flex-end; justify-content: center; padding: 6px 0;
 }
-
 .win95-start-sidebar-text {
   font-family: var(--font-system);
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--w95-white);
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  letter-spacing: 1px;
+  font-size: 9px; font-weight: 700; color: var(--w95-white);
+  writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 1px;
 }
 
 .win95-start-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 8px;
-  cursor: pointer;
-  font-size: 12px;
-  color: var(--w95-black);
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 8px; cursor: pointer; font-size: 12px; color: var(--w95-black);
 }
-
 .win95-start-item:hover {
-  background: var(--w95-navy);
-  color: var(--w95-white);
+  background: var(--w95-navy); color: var(--w95-white);
 }
-
 .win95-start-item-active {
-  background: var(--w95-navy);
-  color: var(--w95-white);
-  font-weight: 700;
+  background: var(--w95-navy); color: var(--w95-white); font-weight: 700;
 }
 
 .win95-start-divider {
-  height: 2px;
-  background: var(--w95-grey-dark);
-  margin: 2px 4px;
-  border-bottom: 1px solid var(--w95-white);
+  height: 2px; background: var(--w95-grey-dark);
+  margin: 2px 4px; border-bottom: 1px solid var(--w95-white);
 }
 
 /* ── DESKTOP ICONS ── */
 .win95-desktop-icon {
-  width: 56px;
-  text-align: center;
-  padding: 6px 2px;
-  cursor: pointer;
+  width: 56px; text-align: center; padding: 6px 2px; cursor: pointer;
 }
-
-.win95-desktop-icon:hover {
-  background: rgba(255,255,255,0.1);
-}
-
-.win95-desktop-icon-emoji {
-  font-size: 24px;
-}
-
+.win95-desktop-icon:hover { background: rgba(255,255,255,0.1); }
+.win95-desktop-icon-emoji { font-size: 24px; }
 .win95-desktop-icon-label {
-  font-size: 9px;
-  color: var(--w95-white);
-  font-weight: 700;
-  text-shadow: 1px 1px 0 var(--w95-black);
-  margin-top: 2px;
+  font-size: 9px; color: var(--w95-white); font-weight: 700;
+  text-shadow: 1px 1px 0 var(--w95-black); margin-top: 2px;
 }
 
 /* ── ROW STYLES ── */
@@ -400,20 +329,12 @@ html, body {
 /* ── LAYOUT ── */
 .app-container {
   background: var(--w95-desktop);
-  min-height: 100vh;
-  max-width: 420px;
-  margin: 0 auto;
+  min-height: 100vh; max-width: 420px; margin: 0 auto;
   font-family: var(--font-system);
-  position: relative;
-  display: flex;
-  flex-direction: column;
+  position: relative; display: flex; flex-direction: column;
 }
-
 .app-content {
-  flex: 1;
-  padding-bottom: 36px;
-  min-height: 0;
-  overflow-y: auto;
+  flex: 1; padding-bottom: 36px; min-height: 0; overflow-y: auto;
 }
 
 /* WhatsApp button */
@@ -423,25 +344,22 @@ html, body {
   font-weight: 700;
 }
 
-/* Info panel */
+/* Info panels */
 .win95-info-panel {
-  padding: 8px;
-  background: #FFFFF0;
+  padding: 8px; margin-top: 8px; background: #FFFFF0;
+  border-top: 2px solid var(--w95-grey-dark); border-left: 2px solid var(--w95-grey-dark);
+  border-right: 2px solid var(--w95-white); border-bottom: 2px solid var(--w95-white);
 }
-
 .win95-info-panel-blue {
-  padding: 8px;
-  background: #F4F8FF;
+  padding: 8px; margin-top: 8px; background: #F4F8FF;
+  border-top: 2px solid var(--w95-grey-dark); border-left: 2px solid var(--w95-grey-dark);
+  border-right: 2px solid var(--w95-white); border-bottom: 2px solid var(--w95-white);
 }
 
 /* Wooden Spoon badge */
 .wooden-spoon-badge {
-  font-size: 10px;
-  font-weight: 700;
-  color: #654321;
-  background: #F5DEB3;
-  padding: 1px 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
+  font-size: 10px; font-weight: 700; color: #654321; background: #F5DEB3;
+  padding: 1px 6px; display: inline-flex; align-items: center; gap: 3px;
+  border-top: 1px solid var(--w95-grey-dark); border-left: 1px solid var(--w95-grey-dark);
+  border-right: 1px solid var(--w95-white); border-bottom: 1px solid var(--w95-white);
 }
