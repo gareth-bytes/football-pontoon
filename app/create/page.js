@@ -142,6 +142,25 @@ export default function CreatePage() {
         } catch (e) {}
       }
 
+      // Send confirmation email to admin
+      try {
+        await fetch('/api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            adminName,
+            adminEmail,
+            gameName,
+            gameCode: code,
+            siteUrl: window.location.origin,
+            sweepAmount: getSweepAmount(),
+          }),
+        });
+      } catch (emailErr) {
+        // Don't block game creation if email fails
+        console.error('Email send failed:', emailErr);
+      }
+
       setGameCode(code);
       setStep(4);
     } catch (err) {
@@ -300,7 +319,11 @@ export default function CreatePage() {
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 24, marginBottom: 6 }}>🎉</div>
             <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Your game is ready!</div>
-            <div style={{ fontSize: 12, color: 'var(--w95-muted)', marginBottom: 8 }}>Share this code or link with your players.</div>
+            <div style={{ fontSize: 12, color: 'var(--w95-muted)', marginBottom: 8 }}>
+              Share this code or link with your players.
+              <br />
+              <span style={{ fontSize: 11, color: 'var(--w95-green)', fontWeight: 700 }}>📧 We&apos;ve emailed this to {adminEmail}</span>
+            </div>
             <Recessed style={{ padding: 16, margin: '8px 0', textAlign: 'center' }}>
               <Label>Game Code</Label>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 28, fontWeight: 700, color: 'var(--w95-navy)', letterSpacing: 6 }}>
