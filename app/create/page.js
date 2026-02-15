@@ -1,9 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Shell from '../../components/Shell';
 import { Window, Btn, Input, Recessed, Divider, Label, Check, Radio, InfoPanel } from '../../components/Win95';
 import { generateGameCode } from '../../lib/game';
+import { supabase, getUser, getTournaments, createGame, addPlayer, checkCodeExists } from '../../lib/supabase';
 
 export default function CreatePage() {
   const router = useRouter();
@@ -11,7 +12,8 @@ export default function CreatePage() {
   const [gameName, setGameName] = useState('');
   const [adminName, setAdminName] = useState('');
   const [adminEmail, setAdminEmail] = useState('');
-  const [tournament, setTournament] = useState('wc2026');
+  const [tournaments, setTournaments] = useState([]);
+  const [tournament, setTournament] = useState('');
   const [sweep, setSweep] = useState(false);
   const [selFee, setSelFee] = useState(null);
   const [customFee, setCustomFee] = useState('');
@@ -19,6 +21,31 @@ export default function CreatePage() {
   const [agreed, setAgreed] = useState({ terms: false, privacy: false, age: false, sweep: false });
   const [marketing, setMarketing] = useState(false);
   const [gameCode, setGameCode] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState('');
+  const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Check if user is logged in, prefill their details
+  useEffect(() => {
+    async function init() {
+      const { user } = await getUser();
+      if (user) {
+        setUser(user);
+        setAdminEmail(user.email || '');
+        setAdminName(user.user_metadata?.full_name || user.user_metadata?.name || '');
+      }
+      setAuthChecked(true);
+
+      // Fetch available tournaments
+      const { data: tourns } = await getTournaments();
+      if (tourns && tourns.length > 0) {
+        setTournaments(tourns);
+        setTournament(tourns[0].id);
+      }
+    }
+    init();
+  }, []);
 
   const handleCustom = (v) => {
     setCustomFee(v);
@@ -29,35 +56,127 @@ export default function CreatePage() {
   const canProceedStep1 = gameName.trim() && adminName.trim() && adminEmail.trim();
   const canProceedStep3 = agreed.terms && agreed.privacy && agreed.age && agreed.sweep;
 
-  const handleCreate = async () => {
-    // TODO: Create game in Supabase
-    const code = generateGameCode();
-    setGameCode(code);
-    setStep(4);
+  const getSweepAmount = () => {
+    if (!sweep) return null;
+    if (selFee) return parseFloat(selFee.replace('£', ''));
+    if (customFee) {
+      const n = parseFloat(customFee.replace('£', ''));
+      return isNaN(n) ? null : n;
+    }
+    return null;
   };
+
+  const handleCreate = async () => {
+    setCreating(true);
+    setCreateError('');
+
+    try {
+      // If not logged in, sign them up first via magic link approach
+      // For now, we need an auth user ID. If they're not logged in,
+      // we'll create a temp approach using their email
+      let userId = user?.id;
+
+      if (!userId) {
+        // Sign in with magic link to create/get account
+        const { data, error } = await supabase.auth.signInWithOtp({
+          email: adminEmail,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            data: { full_name: adminName },
+          },
+        });
+
+        if (error) {
+          // If email auth fails, create game with a generated ID
+          // This is a fallback — ideally they'd be logged in
+          userId = crypto.randomUUID();
+        }
+      }
+
+      // Generate a unique game code
+      let code = generateGameCode();
+      let attempts = 0;
+      while (await checkCodeExists(code) && attempts < 10) {
+        code = generateGameCode();
+        attempts++;
+      }
+
+      // Get the selected tournament for lock time
+      const selectedTourn = tournaments.find(t => t.id === tournament);
+      const lockTime = selectedTourn
+        ? new Date(new Date(selectedTourn.start_date).getTime() - 5 * 60 * 1000).toISOString()
+        : null;
+
+      const { data: game, error } = await createGame({
+        code,
+        name: gameName,
+        tournamentId: tournament,
+        adminId: userId || crypto.randomUUID(),
+        adminName,
+        adminEmail,
+        sweepAmount: getSweepAmount(),
+        marketingOptIn: marketing,
+        lockTime,
+      });
+
+      if (error) {
+        console.error('Create game error:', error);
+        setCreateError(error.message || 'Failed to create game. Please try again.');
+        setCreating(false);
+        return;
+      }
+
+      // Add the admin as a player too
+      await addPlayer({
+        gameId: game.id,
+        name: adminName,
+        isAdmin: true,
+      });
+
+      setGameCode(code);
+      setStep(4);
+    } catch (err) {
+      console.error('Create game error:', err);
+      setCreateError('Something went wrong. Please try again.');
+    }
+
+    setCreating(false);
+  };
+
+  // Get site URL for share links
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : 'footballpontoon.co.uk';
 
   return (
     <Shell>
       <Window title={`🎮 Create a New Game — Step ${step} of 4`} icon="🎮">
         {step === 1 && (
           <div>
+            {!user && authChecked && (
+              <Recessed style={{ padding: 8, marginBottom: 8, background: '#FFFFF0' }}>
+                <div style={{ fontSize: 11, lineHeight: 1.6 }}>
+                  💡 <strong>Tip:</strong> <span className="text-link" onClick={() => router.push('/login')}>Sign in first</span> to
+                  manage your game later. You can still create without signing in — we&apos;ll send you a login link.
+                </div>
+              </Recessed>
+            )}
+
             <Label>Game Name</Label>
             <Input placeholder='e.g. "Office World Cup 2026"' value={gameName} onChange={setGameName} />
             <Divider />
             <Label>Your Details (Game Admin)</Label>
             <div style={{ fontSize: 11, color: 'var(--w95-muted)', marginBottom: 6, lineHeight: 1.5 }}>
-              As the game admin, you'll manage this game. Only you need to provide an email — your players won't need one.
+              As the game admin, you&apos;ll manage this game. Only you need to provide an email — your players won&apos;t need one.
             </div>
             <Input placeholder="Your name" value={adminName} onChange={setAdminName} style={{ marginBottom: 4 }} />
-            <Input placeholder="Email address" type="email" value={adminEmail} onChange={setAdminEmail} />
+            <Input placeholder="Email address" type="email" value={adminEmail} onChange={setAdminEmail} disabled={!!user} />
 
             <InfoPanel>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--w95-navy)', marginBottom: 4 }}>What happens next?</div>
               <div style={{ fontSize: 11, lineHeight: 1.6 }}>
-                Once you create the game, you'll get a <strong>unique code and link</strong> to send to your friends and colleagues so they can join your game of Football Pontoon.
+                Once you create the game, you&apos;ll get a <strong>unique code and link</strong> to send to your friends and colleagues so they can join your game of Football Pontoon.
               </div>
               <div style={{ fontSize: 11, lineHeight: 1.6, marginTop: 4 }}>
-                As admin, you'll be able to <strong>log in and manage</strong> the people who join — track who's paid any sweepstake, see everyone's picks after the deadline, and share updates.
+                As admin, you&apos;ll be able to <strong>log in and manage</strong> the people who join — track who&apos;s paid any sweepstake, see everyone&apos;s picks after the deadline, and share updates.
               </div>
             </InfoPanel>
 
@@ -71,8 +190,20 @@ export default function CreatePage() {
         {step === 2 && (
           <div>
             <Label>Tournament</Label>
-            <Radio checked={tournament === 'wc2026'} label="FIFA World Cup 2026" onClick={() => setTournament('wc2026')} />
-            <Radio checked={tournament === 'cl2526'} label="Champions League 2025/26" onClick={() => setTournament('cl2526')} />
+            {tournaments.length > 0 ? (
+              tournaments.map((t) => (
+                <Radio
+                  key={t.id}
+                  checked={tournament === t.id}
+                  label={`${t.name} (${t.status})`}
+                  onClick={() => setTournament(t.id)}
+                />
+              ))
+            ) : (
+              <div style={{ fontSize: 11, color: 'var(--w95-muted)', padding: '8px 0' }}>
+                Loading tournaments...
+              </div>
+            )}
             <Divider />
 
             <div style={{ padding: 8, background: '#F4F4E8' }} className="bevel-in">
@@ -89,7 +220,7 @@ export default function CreatePage() {
                 <div style={{ marginTop: 8, marginLeft: 21 }}>
                   <Recessed style={{ padding: 8, marginBottom: 8 }}>
                     <div style={{ fontSize: 11, color: 'var(--w95-muted)', lineHeight: 1.6 }}>
-                      ℹ️ Some groups like to add a small, friendly sweepstake — like an office sweepstake. This is entirely between you and your players. Football Pontoon doesn't handle any money.
+                      ℹ️ Some groups like to add a small, friendly sweepstake — like an office sweepstake. This is entirely between you and your players. Football Pontoon doesn&apos;t handle any money.
                     </div>
                   </Recessed>
                   <Label>Suggested amount per person</Label>
@@ -133,37 +264,25 @@ export default function CreatePage() {
           <div>
             <Label>Confirm & Agree</Label>
             <Recessed style={{ padding: 8 }}>
-              <Check
-                checked={agreed.terms}
-                onChange={() => setAgreed(a => ({ ...a, terms: !a.terms }))}
-                label={<span>I agree to the <span className="text-link" onClick={() => router.push('/terms')}>Terms & Conditions</span></span>}
-              />
-              <Check
-                checked={agreed.privacy}
-                onChange={() => setAgreed(a => ({ ...a, privacy: !a.privacy }))}
-                label={<span>I've read the <span className="text-link" onClick={() => router.push('/privacy')}>Privacy Policy</span></span>}
-              />
-              <Check
-                checked={agreed.age}
-                onChange={() => setAgreed(a => ({ ...a, age: !a.age }))}
-                label="I confirm all players in my game will be 18+"
-              />
-              <Check
-                checked={agreed.sweep}
-                onChange={() => setAgreed(a => ({ ...a, sweep: !a.sweep }))}
-                label="I understand any sweepstake is organised privately by me"
-              />
+              <Check checked={agreed.terms} onChange={() => setAgreed(a => ({ ...a, terms: !a.terms }))} label={<span>I agree to the <span className="text-link" onClick={() => router.push('/terms')}>Terms &amp; Conditions</span></span>} />
+              <Check checked={agreed.privacy} onChange={() => setAgreed(a => ({ ...a, privacy: !a.privacy }))} label={<span>I&apos;ve read the <span className="text-link" onClick={() => router.push('/privacy')}>Privacy Policy</span></span>} />
+              <Check checked={agreed.age} onChange={() => setAgreed(a => ({ ...a, age: !a.age }))} label="I confirm all players in my game will be 18+" />
+              <Check checked={agreed.sweep} onChange={() => setAgreed(a => ({ ...a, sweep: !a.sweep }))} label="I understand any sweepstake is organised privately by me" />
               <Divider />
-              <Check
-                checked={marketing}
-                onChange={() => setMarketing(!marketing)}
-                label="Send me updates about new features (optional)"
-                muted
-              />
+              <Check checked={marketing} onChange={() => setMarketing(!marketing)} label="Send me updates about new features (optional)" muted />
             </Recessed>
+
+            {createError && (
+              <Recessed style={{ padding: 8, marginTop: 8, background: '#FFF0F0' }}>
+                <div style={{ fontSize: 11, color: 'var(--w95-red)', fontWeight: 700 }}>⚠️ {createError}</div>
+              </Recessed>
+            )}
+
             <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
               <Btn onClick={() => setStep(2)}>← Back</Btn>
-              <Btn primary disabled={!canProceedStep3} onClick={handleCreate}>Create Game</Btn>
+              <Btn primary disabled={!canProceedStep3 || creating} onClick={handleCreate}>
+                {creating ? '⏳ Creating...' : 'Create Game'}
+              </Btn>
             </div>
           </div>
         )}
@@ -179,12 +298,20 @@ export default function CreatePage() {
                 {gameCode}
               </div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--w95-muted)', marginTop: 6, wordBreak: 'break-all' }}>
-                footballpontoon.co.uk/join/{gameCode}
+                {siteUrl}/join?code={gameCode}
               </div>
             </Recessed>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <Btn className="btn-whatsapp">💬 Share to WhatsApp</Btn>
-              <Btn onClick={() => navigator.clipboard?.writeText(`footballpontoon.co.uk/join/${gameCode}`)}>
+              <Btn
+                className="btn-whatsapp"
+                onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(`Join my Football Pontoon game! 🎉⚽\n\nCode: ${gameCode}\nJoin here: ${siteUrl}/join?code=${gameCode}`)}`, '_blank')}
+              >
+                💬 Share to WhatsApp
+              </Btn>
+              <Btn onClick={() => {
+                navigator.clipboard?.writeText(`${siteUrl}/join?code=${gameCode}`);
+                alert('Link copied!');
+              }}>
                 📋 Copy Link
               </Btn>
               <Divider />
