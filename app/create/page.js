@@ -127,11 +127,20 @@ export default function CreatePage() {
       }
 
       // Add the admin as a player too
-      await addPlayer({
+      const { data: adminPlayer } = await addPlayer({
         gameId: game.id,
         name: adminName,
         isAdmin: true,
       });
+
+      // Store player ID so team selection can find us
+      if (adminPlayer && typeof window !== 'undefined') {
+        try {
+          const pontoonData = JSON.parse(localStorage.getItem('pontoon') || '{}');
+          pontoonData[code] = { playerId: adminPlayer.id, playerName: adminName };
+          localStorage.setItem('pontoon', JSON.stringify(pontoonData));
+        } catch (e) {}
+      }
 
       setGameCode(code);
       setStep(4);
